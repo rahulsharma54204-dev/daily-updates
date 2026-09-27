@@ -20,8 +20,8 @@ jobs:
 
       - name: Generate Deep Activity
         run: |
-          git config --local user.email "rajusharma98966@gmail.com"
-          git config --local user.name "Rajusharma-ship-it"
+          git config --local user.email "rahulsharma54204@gmail.com"
+          git config --local user.name "rahulsharma54204-dev"
 
           mkdir -p daily-logs
 

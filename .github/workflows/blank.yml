@@ -8,13 +8,17 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: daily-log
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -26,10 +30,10 @@ jobs:
           mkdir -p daily-logs
 
           TOPICS=(
-            "react-performance-hooks" 
-            "nextjs-edge-runtime" 
-            "typescript-utility-types" 
-            "nodejs-worker-threads" 
+            "react-performance-hooks"
+            "nextjs-edge-runtime"
+            "typescript-utility-types"
+            "nodejs-worker-threads"
             "postgresql-query-optimization"
             "clean-architecture-patterns"
             "microservices-communication"
@@ -46,15 +50,19 @@ jobs:
             FILENAME="daily-logs/${RANDOM_TOPIC}-${UNIQUE_ID: -6}.md"
             TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
 
-            echo "## Deep Dive: ${RANDOM_TOPIC//-/ }" > $FILENAME
-            echo "Logged on: $TIMESTAMP" >> $FILENAME
-            echo -e "\n### Technical Analysis\n" >> $FILENAME
-            echo "Current focus is on scaling $RANDOM_TOPIC." >> $FILENAME
+            echo "## Deep Dive: ${RANDOM_TOPIC//-/ }" > "$FILENAME"
+            echo "Logged on: $TIMESTAMP" >> "$FILENAME"
+            echo -e "\n### Technical Analysis\n" >> "$FILENAME"
+            echo "Current focus is on scaling $RANDOM_TOPIC." >> "$FILENAME"
 
             git add .
-            git commit -m "feat: optimize $RANDOM_TOPIC logic ($TIMESTAMP) [skip ci]"
+
+            if ! git diff --cached --quiet; then
+              git commit -m "feat: optimize $RANDOM_TOPIC logic ($TIMESTAMP) [skip ci]"
+            fi
 
             sleep $(( ( RANDOM % 4 ) + 1 ))
           done
 
-          git push
+          git pull --rebase origin main || true
+          git push origin main
